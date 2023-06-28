@@ -3,8 +3,6 @@ import { galleryItems } from "./gallery-items.js";
 
 const galleryContainerRef = document.querySelector(".gallery");
 
-galleryContainerRef.addEventListener("click", showOriginalImg);
-
 function createGalleryElements() {
   const galleryElements = galleryItems
     .map(
@@ -25,23 +23,26 @@ function createGalleryElements() {
 
 createGalleryElements();
 
+galleryContainerRef.addEventListener("click", showOriginalImg);
+
 function showOriginalImg(event) {
   const { nodeName, dataset } = event.target;
+  const { currentTarget } = event;
   event.preventDefault();
   if (nodeName !== "IMG") {
     return;
   }
 
-  const modalShowImg = basicLightbox.create(`<img src=${dataset.source}>`);
+  const modalShowImg = basicLightbox.create(`<img src=${dataset.source}>`, {
+    onShow: () => currentTarget.addEventListener("keydown", escapeBtnClose),
+    onClose: () => currentTarget.removeEventListener("keydown", escapeBtnClose),
+  });
+
   modalShowImg.show();
-  galleryContainerRef.addEventListener("keydown", escapeBtnClose);
 
   function escapeBtnClose(eve) {
     if (eve.code === "Escape") {
       modalShowImg.close();
-      galleryContainerRef.removeEventListener("keydown", escapeBtnClose);
-      //console.log('removeEventListener("keydown", escapeBtnClose)');
-      //Цікаво запитати в Руслана!!!!!
     }
   }
 }
